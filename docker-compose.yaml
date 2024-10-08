@@ -10,7 +10,7 @@ services:
       - "3000:3000"
     volumes:
       - ./public:/app/public
-      - ./database:/app/database
+      # - ./database:/app/database
     environment:
       - HOST=0.0.0.0
       - PORT=3000
