@@ -4,7 +4,6 @@ services:
       context: .
       args: 
         DATABASE_URL: mysql://root:example@mariadb:3306/nuxtdb
-
     container_name: nuxt_app_container
     ports:
       - "3000:3000"
@@ -15,7 +14,8 @@ services:
       - HOST=0.0.0.0
       - PORT=3000
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy  # Wait for MariaDB to be healthy before starting
     networks:
       - nuxt_network
 
@@ -34,6 +34,11 @@ services:
       - ./database:/var/lib/mysql
     networks:
       - nuxt_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5  # Ensure that MariaDB is fully ready before marking healthy
 
 networks:
   nuxt_network:
