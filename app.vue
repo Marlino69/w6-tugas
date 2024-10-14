@@ -1,6 +1,5 @@
 <template>
   <main class="container-fluid">
-
     <!-- Form to add new comment -->
     <div class="grid">
       <div id="section-form">
@@ -9,6 +8,7 @@
         <section>
           <h2>Add a Comment</h2>
           <form @submit.prevent="addComment">
+            <input type="hidden" :value="csrfToken" name="_csrf" />
             <label for="name">Name:</label>
             <input type="text" id="name" v-model="form.name" required />
 
@@ -40,7 +40,7 @@
             <h3>{{ comment.name }}</h3>
             <small>{{ comment.email }}</small>
           </header>
-          <div v-html="comment.comment"></div>
+          <div>{{ comment.comment }}</div> <!-- Hindari penggunaan v-html -->
         </article>
       </section>
     </div>
@@ -58,6 +58,7 @@ const form = ref({
 
 const comments = ref([])
 const searchQuery = ref('')
+const csrfToken = ref('')
 
 const fetchComments = async () => {
   try {
@@ -70,11 +71,25 @@ const fetchComments = async () => {
   }
 }
 
+const fetchCsrfToken = async () => {
+  try {
+    const response = await $fetch('/api/get-csrf-token', {
+      method: 'GET'
+    })
+    csrfToken.value = response.token
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error)
+  }
+}
+
 const addComment = async () => {
   try {
     await $fetch('/api/add-comment', {
       method: 'POST',
-      body: form.value
+      body: {
+        ...form.value,
+        _csrf: csrfToken.value
+      }
     })
 
     form.value = {
@@ -107,20 +122,21 @@ const searchComments = async () => {
 
 const downloadFile = async () => {
   try {
-    const filename = 'guide.pdf';
+    const filename = 'guide.pdf'
 
-    const url = `/api/read-file?filename=${encodeURIComponent(filename)}`;
+    const url = `/api/read-file?filename=${encodeURIComponent(filename)}`
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
   } catch (error) {
-    console.error('Failed to download the file:', error);
+    console.error('Failed to download the file:', error)
   }
 }
 
 onMounted(() => {
+  fetchCsrfToken()
   fetchComments()
 })
 </script>
