@@ -129,16 +129,19 @@ const searchComments = async () => {
 
 const downloadFile = async () => {
   try {
-    const filename = 'guide.pdf'
-    const url = "/api/read-file?filename=${ encodeURIComponent(filename)}"
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    link.click()
-  } catch (error) {
-    console.error('Failed to download the file:', error)
+    const filename = 'guide.pdf';
+    const url = `/api/read-file?filename=${encodeURIComponent(filename)}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }catch (error) {
+    console.error('Failed to download the file:', error);
+    alert('Failed to download the file. Please try again later.');
   }
-}
+};
 
 onMounted(() => {
   fetchCsrfToken()
