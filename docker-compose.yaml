@@ -1,21 +1,22 @@
+version: '3'
 services:
   nuxt-app:
     build:
       context: .
       args: 
         DATABASE_URL: mysql://root:example@mariadb:3306/nuxtdb
-
     container_name: nuxt_app_container
     ports:
       - "3000:3000"
     volumes:
       - ./public:/app/public
-      # - ./database:/app/database
+      - ./wait-for-it.sh:/wait-for-it.sh # Tambahkan wait-for-it.sh ke container
     environment:
       - HOST=0.0.0.0
       - PORT=3000
     depends_on:
       - mariadb
+    entrypoint: ["./wait-for-it.sh", "mariadb:3306", "--", "npm", "run", "dev"] # Gunakan wait-for-it.sh untuk menunggu MariaDB siap
     networks:
       - nuxt_network
 
